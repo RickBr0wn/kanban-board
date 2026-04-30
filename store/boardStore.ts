@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { arrayMove } from '@dnd-kit/sortable'
-import { type Board, type Column, type Card, SAMPLE_BOARD } from '@/lib/data'
+import { type Board, type Column, type Card, type Priority, type LabelColor, SAMPLE_BOARD } from '@/lib/data'
 
 type BoardStore = {
   boards: Board[]
@@ -14,7 +14,7 @@ type BoardStore = {
   renameColumn: (columnId: string, title: string) => void
   deleteColumn: (columnId: string) => void
   addCard: (columnId: string, title: string) => void
-  editCard: (cardId: string, title: string) => void
+  updateCard: (cardId: string, updates: Partial<Pick<Card, 'title' | 'description' | 'dueDate' | 'priority' | 'labels'>>) => void
   deleteCard: (cardId: string) => void
   moveCard: (cardId: string, toColumnId: string, toIndex: number) => void
   moveColumn: (boardId: string, columnId: string, toIndex: number) => void
@@ -103,13 +103,13 @@ export const useBoardStore = create<BoardStore>()(
           })),
         })),
 
-      editCard: (cardId, title) =>
+      updateCard: (cardId, updates) =>
         set((state) => ({
           boards: state.boards.map((b) => ({
             ...b,
             columns: b.columns.map((c) => ({
               ...c,
-              cards: c.cards.map((card) => (card.id === cardId ? { ...card, title } : card)),
+              cards: c.cards.map((card) => (card.id === cardId ? { ...card, ...updates } : card)),
             })),
           })),
         })),
