@@ -33,6 +33,7 @@ A personal Kanban board web application for managing tasks and projects. Built i
 ## 4. Core Features
 
 ### Phase 1 — Foundation (MVP)
+
 - [ ] Create, rename, and delete **boards**
 - [ ] Create, rename, and delete **columns** (e.g. To Do / In Progress / Done)
 - [ ] Create, edit, and delete **cards** within columns
@@ -40,18 +41,21 @@ A personal Kanban board web application for managing tasks and projects. Built i
 - [ ] Data persisted in browser localStorage
 
 ### Phase 2 — Richer Cards
+
 - [ ] Card descriptions (markdown support)
 - [ ] Due dates on cards
 - [ ] Priority labels (Low / Medium / High / Critical)
 - [ ] Color-coded labels / tags
 
 ### Phase 3 — Persistence & Data
+
 - [ ] Backend API (replace localStorage)
 - [ ] Database storage (PostgreSQL via Supabase or similar)
 - [ ] User authentication (sign in with GitHub / Google)
 - [ ] Data scoped to logged-in user
 
 ### Phase 4 — Polish
+
 - [ ] Board-level search / filter by label or text
 - [ ] Card activity log (created, moved, edited)
 - [ ] Archive and restore cards
@@ -62,15 +66,15 @@ A personal Kanban board web application for managing tasks and projects. Built i
 
 ## 5. User Stories
 
-| As a user I want to… | So that… |
-|---|---|
-| Create a new board | I can organize separate projects |
-| Add columns to a board | I can define my own workflow stages |
-| Add cards to a column | I can capture tasks |
-| Drag a card to another column | I can update a task's status quickly |
-| Edit a card's title and description | I can add detail to a task |
-| Delete a card or column I no longer need | The board stays clean |
-| Have my data persist across sessions | I don't lose my work |
+| As a user I want to…                     | So that…                             |
+| ---------------------------------------- | ------------------------------------ |
+| Create a new board                       | I can organize separate projects     |
+| Add columns to a board                   | I can define my own workflow stages  |
+| Add cards to a column                    | I can capture tasks                  |
+| Drag a card to another column            | I can update a task's status quickly |
+| Edit a card's title and description      | I can add detail to a task           |
+| Delete a card or column I no longer need | The board stays clean                |
+| Have my data persist across sessions     | I don't lose my work                 |
 
 ---
 
@@ -101,30 +105,30 @@ Card
 
 ## 7. Tech Stack
 
-| Layer | Choice | Reason |
-|---|---|---|
-| Framework | Next.js (App Router) | Consistent with your existing portfolio setup |
-| Language | TypeScript | Catches errors early, great DX |
-| Styling | Tailwind CSS | Fast to write, easy to maintain |
-| Drag & Drop | `@dnd-kit/core` | Modern, accessible, actively maintained |
-| State | Zustand | Lightweight, simple API for local state |
-| Persistence (Phase 1) | localStorage | No backend required to start |
-| Persistence (Phase 3) | Supabase | Hosted Postgres + auth with minimal setup |
+| Layer                 | Choice               | Reason                                        |
+| --------------------- | -------------------- | --------------------------------------------- |
+| Framework             | Next.js (App Router) | Consistent with your existing portfolio setup |
+| Language              | TypeScript           | Catches errors early, great DX                |
+| Styling               | Tailwind CSS         | Fast to write, easy to maintain               |
+| Drag & Drop           | `@dnd-kit/core`      | Modern, accessible, actively maintained       |
+| State                 | Zustand              | Lightweight, simple API for local state       |
+| Persistence (Phase 1) | localStorage         | No backend required to start                  |
+| Persistence (Phase 3) | Supabase             | Hosted Postgres + auth with minimal setup     |
 
 ---
 
 ## 8. Build Phases & Milestones
 
-| Milestone | Deliverable |
-|---|---|
-| M1 | Project scaffolding — Next.js + Tailwind + TypeScript |
-| M2 | Static board layout — hardcoded columns and cards |
-| M3 | Dynamic state — add/edit/delete boards, columns, cards |
-| M4 | Drag-and-drop — cards reorder and move between columns |
-| M5 | LocalStorage persistence — data survives refresh |
-| M6 | Richer cards — descriptions, due dates, labels |
-| M7 | Backend + auth — Supabase integration |
-| M8 | Polish — search, keyboard shortcuts, light mode toggle |
+| Milestone | Deliverable                                            |
+| --------- | ------------------------------------------------------ |
+| M1        | Project scaffolding — Next.js + Tailwind + TypeScript  |
+| M2        | Static board layout — hardcoded columns and cards      |
+| M3        | Dynamic state — add/edit/delete boards, columns, cards |
+| M4        | Drag-and-drop — cards reorder and move between columns |
+| M5        | LocalStorage persistence — data survives refresh       |
+| M6        | Richer cards — descriptions, due dates, labels         |
+| M7        | Backend + auth — Supabase integration                  |
+| M8        | Polish — search, keyboard shortcuts, light mode toggle |
 
 ---
 
