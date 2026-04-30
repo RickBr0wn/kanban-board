@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -40,6 +40,10 @@ const collisionDetection: CollisionDetection = (args) => {
 export function KanbanBoard() {
   const { boards, activeBoardId, setActiveBoard, addBoard, renameBoard, deleteBoard, addColumn, moveCard, moveColumn } =
     useBoardStore()
+
+  useEffect(() => {
+    useBoardStore.persist.rehydrate()
+  }, [])
 
   const [renamingBoardId, setRenamingBoardId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
