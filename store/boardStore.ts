@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { arrayMove } from '@dnd-kit/sortable'
 import { type Board, type Column, type Card, SAMPLE_BOARD } from '@/lib/data'
 
 type BoardStore = {
@@ -15,6 +16,7 @@ type BoardStore = {
   editCard: (cardId: string, title: string) => void
   deleteCard: (cardId: string) => void
   moveCard: (cardId: string, toColumnId: string, toIndex: number) => void
+  moveColumn: (boardId: string, columnId: string, toIndex: number) => void
 }
 
 export const useBoardStore = create<BoardStore>((set) => ({
@@ -150,4 +152,14 @@ export const useBoardStore = create<BoardStore>((set) => ({
         })),
       }
     }),
+
+  moveColumn: (boardId, columnId, toIndex) =>
+    set((state) => ({
+      boards: state.boards.map((b) => {
+        if (b.id !== boardId) return b
+        const fromIndex = b.columns.findIndex((c) => c.id === columnId)
+        if (fromIndex === -1 || fromIndex === toIndex) return b
+        return { ...b, columns: arrayMove(b.columns, fromIndex, toIndex) }
+      }),
+    })),
 }))

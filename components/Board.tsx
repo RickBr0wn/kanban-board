@@ -10,21 +10,42 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
-  closestCorners,
+  closestCenter,
+  pointerWithin,
+  type CollisionDetection,
 } from '@dnd-kit/core'
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable'
 import { useBoardStore } from '@/store/boardStore'
 import { KanbanColumn } from './Column'
 
+const collisionDetection: CollisionDetection = (args) => {
+  if (args.active.data.current?.type === 'column') {
+    const columnOnly = {
+      ...args,
+      droppableContainers: args.droppableContainers.filter(
+        (c) => c.data.current?.type === 'column'
+      ),
+    }
+    const hits = pointerWithin(columnOnly)
+    if (hits.length > 0) return hits
+    return closestCenter(columnOnly)
+  }
+  return closestCenter(args)
+}
+
 export function KanbanBoard() {
-  const { boards, activeBoardId, setActiveBoard, addBoard, renameBoard, deleteBoard, addColumn, moveCard } =
+  const { boards, activeBoardId, setActiveBoard, addBoard, renameBoard, deleteBoard, addColumn, moveCard, moveColumn } =
     useBoardStore()
 
   const [renamingBoardId, setRenamingBoardId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
   const [addingColumn, setAddingColumn] = useState(false)
   const [newColumnTitle, setNewColumnTitle] = useState('')
-  const [activeCardId, setActiveCardId] = useState<string | null>(null)
+  const [dragItem, setDragItem] = useState<{ id: string; type: 'card' | 'column' } | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -32,9 +53,12 @@ export function KanbanBoard() {
   )
 
   const activeBoard = boards.find((b) => b.id === activeBoardId)
-  const activeCard = activeBoard?.columns
-    .flatMap((c) => c.cards)
-    .find((card) => card.id === activeCardId)
+  const activeCard = dragItem?.type === 'card'
+    ? activeBoard?.columns.flatMap((c) => c.cards).find((card) => card.id === dragItem.id)
+    : undefined
+  const activeColumn = dragItem?.type === 'column'
+    ? activeBoard?.columns.find((c) => c.id === dragItem.id)
+    : undefined
 
   function handleAddBoard() {
     const newId = addBoard('New Board')
@@ -59,24 +83,37 @@ export function KanbanBoard() {
   }
 
   function handleDragStart(event: DragStartEvent) {
-    setActiveCardId(event.active.id as string)
+    const type = event.active.data.current?.type ?? 'card'
+    setDragItem({ id: event.active.id as string, type })
   }
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
-    setActiveCardId(null)
+    setDragItem(null)
 
     if (!over || !activeBoard || active.id === over.id) return
 
     const activeId = active.id as string
     const overId = over.id as string
+    const type = active.data.current?.type ?? 'card'
 
+    if (type === 'column') {
+      // Resolve target column — over might be a column ID or a card ID inside a column
+      const targetColumn =
+        activeBoard.columns.find((c) => c.id === overId) ||
+        activeBoard.columns.find((c) => c.cards.some((card) => card.id === overId))
+      if (!targetColumn) return
+      const toIndex = activeBoard.columns.findIndex((c) => c.id === targetColumn.id)
+      moveColumn(activeBoard.id, activeId, toIndex)
+      return
+    }
+
+    // Card drag
     const sourceColumn = activeBoard.columns.find((c) =>
       c.cards.some((card) => card.id === activeId)
     )
     if (!sourceColumn) return
 
-    // Dropped directly onto a column (e.g. empty column)
     const targetColumnDirect = activeBoard.columns.find((c) => c.id === overId)
     if (targetColumnDirect) {
       if (targetColumnDirect.id !== sourceColumn.id) {
@@ -85,7 +122,6 @@ export function KanbanBoard() {
       return
     }
 
-    // Dropped onto a card
     const targetColumn = activeBoard.columns.find((c) =>
       c.cards.some((card) => card.id === overId)
     )
@@ -178,15 +214,21 @@ export function KanbanBoard() {
       {/* Columns */}
       {activeBoard && (
         <DndContext
+          id="board-dnd"
           sensors={sensors}
-          collisionDetection={closestCorners}
+          collisionDetection={collisionDetection}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
           <main className="flex flex-1 gap-4 p-6 overflow-x-auto items-start">
-            {activeBoard.columns.map((column) => (
-              <KanbanColumn key={column.id} column={column} />
-            ))}
+            <SortableContext
+              items={activeBoard.columns.map((c) => c.id)}
+              strategy={horizontalListSortingStrategy}
+            >
+              {activeBoard.columns.map((column) => (
+                <KanbanColumn key={column.id} column={column} />
+              ))}
+            </SortableContext>
 
             {addingColumn ? (
               <div className="flex flex-col w-72 flex-shrink-0 bg-slate-800 rounded-xl p-3 gap-2">
@@ -241,6 +283,16 @@ export function KanbanBoard() {
                     {activeCard.description}
                   </p>
                 )}
+              </div>
+            )}
+            {activeColumn && (
+              <div className="bg-slate-800 rounded-xl p-3 w-72 shadow-2xl rotate-1 opacity-90">
+                <div className="flex items-center gap-2 px-1">
+                  <p className="text-sm font-semibold text-slate-200">{activeColumn.title}</p>
+                  <span className="text-xs text-slate-400 bg-slate-700 rounded-full px-2 py-0.5">
+                    {activeColumn.cards.length}
+                  </span>
+                </div>
               </div>
             )}
           </DragOverlay>

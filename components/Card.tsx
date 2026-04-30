@@ -14,6 +14,7 @@ export function KanbanCard({ card }: { card: Card }) {
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id,
+    data: { type: 'card' },
   })
 
   const style = {

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useDroppable } from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useBoardStore } from '@/store/boardStore'
 import type { Column } from '@/lib/data'
 import { KanbanCard } from './Card'
@@ -15,7 +15,19 @@ export function KanbanColumn({ column }: { column: Column }) {
   const [addingCard, setAddingCard] = useState(false)
   const [newCardTitle, setNewCardTitle] = useState('')
 
-  const { setNodeRef, isOver } = useDroppable({ id: column.id })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: column.id, data: { type: 'column' } })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
 
   function saveTitle() {
     const trimmed = titleDraft.trim()
@@ -36,35 +48,64 @@ export function KanbanColumn({ column }: { column: Column }) {
   }
 
   return (
-    <div className="flex flex-col w-72 flex-shrink-0 bg-slate-800 rounded-xl p-3 gap-2">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex flex-col w-72 flex-shrink-0 bg-slate-800 rounded-xl p-3 gap-2 ${
+        isDragging ? 'opacity-40' : ''
+      }`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-1 mb-1">
-        {editingTitle ? (
-          <input
-            autoFocus
-            value={titleDraft}
-            onChange={(e) => setTitleDraft(e.target.value)}
-            onBlur={saveTitle}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') saveTitle()
-              if (e.key === 'Escape') {
-                setTitleDraft(column.title)
-                setEditingTitle(false)
-              }
-            }}
-            className="flex-1 px-1 py-0.5 text-sm font-semibold bg-slate-700 text-slate-100 rounded border border-blue-500 outline-none"
-          />
-        ) : (
-          <h2
-            className="text-sm font-semibold text-slate-200 cursor-pointer hover:text-white"
-            onClick={() => {
-              setTitleDraft(column.title)
-              setEditingTitle(true)
-            }}
+        <div className="flex items-center gap-1 flex-1 min-w-0">
+          {/* Drag handle */}
+          <button
+            {...attributes}
+            {...listeners}
+            className="flex-shrink-0 p-1 text-slate-600 hover:text-slate-400 rounded cursor-grab active:cursor-grabbing touch-none"
+            title="Drag to reorder column"
           >
-            {column.title}
-          </h2>
-        )}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-3.5 w-3.5"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <circle cx="9" cy="5" r="1.5" />
+              <circle cx="15" cy="5" r="1.5" />
+              <circle cx="9" cy="12" r="1.5" />
+              <circle cx="15" cy="12" r="1.5" />
+              <circle cx="9" cy="19" r="1.5" />
+              <circle cx="15" cy="19" r="1.5" />
+            </svg>
+          </button>
+          {editingTitle ? (
+            <input
+              autoFocus
+              value={titleDraft}
+              onChange={(e) => setTitleDraft(e.target.value)}
+              onBlur={saveTitle}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') saveTitle()
+                if (e.key === 'Escape') {
+                  setTitleDraft(column.title)
+                  setEditingTitle(false)
+                }
+              }}
+              className="flex-1 px-1 py-0.5 text-sm font-semibold bg-slate-700 text-slate-100 rounded border border-blue-500 outline-none"
+            />
+          ) : (
+            <h2
+              className="text-sm font-semibold text-slate-200 cursor-pointer hover:text-white"
+              onClick={() => {
+                setTitleDraft(column.title)
+                setEditingTitle(true)
+              }}
+            >
+              {column.title}
+            </h2>
+          )}
+        </div>
         <div className="flex items-center gap-1 ml-2">
           <span className="text-xs text-slate-400 bg-slate-700 rounded-full px-2 py-0.5">
             {column.cards.length}
@@ -89,17 +130,12 @@ export function KanbanColumn({ column }: { column: Column }) {
         </div>
       </div>
 
-      {/* Cards — droppable area */}
+      {/* Cards */}
       <SortableContext
         items={column.cards.map((c) => c.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div
-          ref={setNodeRef}
-          className={`flex flex-col gap-2 min-h-8 rounded-lg transition-colors ${
-            isOver && column.cards.length === 0 ? 'bg-slate-700/50' : ''
-          }`}
-        >
+        <div className="flex flex-col gap-2 min-h-8">
           {column.cards.map((card) => (
             <KanbanCard key={card.id} card={card} />
           ))}
