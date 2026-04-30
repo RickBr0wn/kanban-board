@@ -109,7 +109,7 @@ export function KanbanCard({ card }: { card: Card }) {
         </button>
       </div>
 
-      {modalOpen && <CardModal card={card} onClose={() => setModalOpen(false)} />}
+      {modalOpen && <CardModal mode="edit" card={card} onClose={() => setModalOpen(false)} />}
     </>
   )
 }

@@ -27,24 +27,36 @@ function formatDateForInput(iso: string): string {
   return iso.slice(0, 10)
 }
 
-export function CardModal({ card, onClose }: { card: Card; onClose: () => void }) {
-  const { updateCard } = useBoardStore()
+type CardModalProps =
+  | { mode: 'edit'; card: Card; onClose: () => void }
+  | { mode: 'create'; columnId: string; onClose: () => void }
 
-  const [title, setTitle] = useState(card.title)
-  const [description, setDescription] = useState(card.description ?? '')
-  const [dueDate, setDueDate] = useState(card.dueDate ? formatDateForInput(card.dueDate) : '')
-  const [priority, setPriority] = useState<Priority | undefined>(card.priority)
-  const [labels, setLabels] = useState<LabelColor[]>(card.labels ?? [])
+export function CardModal(props: CardModalProps) {
+  const { updateCard, addCard } = useBoardStore()
+
+  const isEdit = props.mode === 'edit'
+  const [title, setTitle] = useState(isEdit ? props.card.title : '')
+  const [description, setDescription] = useState(isEdit ? (props.card.description ?? '') : '')
+  const [dueDate, setDueDate] = useState(isEdit && props.card.dueDate ? formatDateForInput(props.card.dueDate) : '')
+  const [priority, setPriority] = useState<Priority | undefined>(isEdit ? props.card.priority : undefined)
+  const [labels, setLabels] = useState<LabelColor[]>(isEdit ? (props.card.labels ?? []) : [])
   const [preview, setPreview] = useState(false)
 
+  const { onClose } = props
+
   function save() {
-    updateCard(card.id, {
-      title: title.trim() || card.title,
+    const details = {
+      title: title.trim() || (isEdit ? props.card.title : 'New Card'),
       description: description.trim() || undefined,
       dueDate: dueDate || undefined,
       priority,
       labels: labels.length > 0 ? labels : undefined,
-    })
+    }
+    if (isEdit) {
+      updateCard(props.card.id, details)
+    } else {
+      addCard(props.columnId, details)
+    }
     onClose()
   }
 
@@ -70,11 +82,13 @@ export function CardModal({ card, onClose }: { card: Card; onClose: () => void }
         {/* Title */}
         <div className="flex items-start gap-3 p-5 border-b border-slate-700">
           <textarea
+            autoFocus
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            placeholder="Card title"
             rows={1}
             onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
-            className="flex-1 text-base font-semibold bg-transparent text-slate-100 resize-none outline-none leading-snug"
+            className="flex-1 text-base font-semibold bg-transparent text-slate-100 resize-none outline-none leading-snug placeholder:text-slate-500 placeholder:font-normal"
           />
           <button
             onClick={onClose}

@@ -128,6 +128,7 @@ Card
 | M4.5      | Drag-and-drop — columns reorder within a board         |
 | M5        | LocalStorage persistence — data survives refresh       |
 | M6        | Richer cards — descriptions, due dates, labels         |
+| M6.5      | Add card uses full modal (labels, priority, due date)  |
 | M7        | Backend + auth — Supabase integration                  |
 | M8        | Polish — search, keyboard shortcuts, light mode toggle |
 

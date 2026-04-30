@@ -13,7 +13,7 @@ type BoardStore = {
   addColumn: (boardId: string, title: string) => void
   renameColumn: (columnId: string, title: string) => void
   deleteColumn: (columnId: string) => void
-  addCard: (columnId: string, title: string) => void
+  addCard: (columnId: string, details: { title: string; description?: string; dueDate?: string; priority?: Priority; labels?: LabelColor[] }) => void
   updateCard: (cardId: string, updates: Partial<Pick<Card, 'title' | 'description' | 'dueDate' | 'priority' | 'labels'>>) => void
   deleteCard: (cardId: string) => void
   moveCard: (cardId: string, toColumnId: string, toIndex: number) => void
@@ -85,7 +85,7 @@ export const useBoardStore = create<BoardStore>()(
           })),
         })),
 
-      addCard: (columnId, title) =>
+      addCard: (columnId, details) =>
         set((state) => ({
           boards: state.boards.map((b) => ({
             ...b,
@@ -94,9 +94,9 @@ export const useBoardStore = create<BoardStore>()(
               const newCard: Card = {
                 id: crypto.randomUUID(),
                 columnId,
-                title,
                 order: c.cards.length,
                 createdAt: new Date().toISOString(),
+                ...details,
               }
               return { ...c, cards: [...c.cards, newCard] }
             }),

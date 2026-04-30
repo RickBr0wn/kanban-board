@@ -6,14 +6,14 @@ import { CSS } from '@dnd-kit/utilities'
 import { useBoardStore } from '@/store/boardStore'
 import type { Column } from '@/lib/data'
 import { KanbanCard } from './Card'
+import { CardModal } from './CardModal'
 
 export function KanbanColumn({ column }: { column: Column }) {
-  const { renameColumn, deleteColumn, addCard } = useBoardStore()
+  const { renameColumn, deleteColumn } = useBoardStore()
 
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState(column.title)
-  const [addingCard, setAddingCard] = useState(false)
-  const [newCardTitle, setNewCardTitle] = useState('')
+  const [addCardModalOpen, setAddCardModalOpen] = useState(false)
 
   const {
     attributes,
@@ -39,13 +39,6 @@ export function KanbanColumn({ column }: { column: Column }) {
     setEditingTitle(false)
   }
 
-  function handleAddCard() {
-    if (newCardTitle.trim()) {
-      addCard(column.id, newCardTitle.trim())
-      setNewCardTitle('')
-      setAddingCard(false)
-    }
-  }
 
   return (
     <div
@@ -142,52 +135,15 @@ export function KanbanColumn({ column }: { column: Column }) {
         </div>
       </SortableContext>
 
-      {/* Add card */}
-      {addingCard ? (
-        <div className="flex flex-col gap-2 mt-1">
-          <textarea
-            autoFocus
-            value={newCardTitle}
-            onChange={(e) => setNewCardTitle(e.target.value)}
-            placeholder="Card title"
-            rows={2}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                handleAddCard()
-              }
-              if (e.key === 'Escape') {
-                setNewCardTitle('')
-                setAddingCard(false)
-              }
-            }}
-            className="px-2 py-1.5 text-sm bg-slate-700 text-slate-100 rounded border border-blue-500 outline-none placeholder:text-slate-500 resize-none"
-          />
-          <div className="flex gap-2">
-            <button
-              onClick={handleAddCard}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-500 transition-colors"
-            >
-              Add card
-            </button>
-            <button
-              onClick={() => {
-                setNewCardTitle('')
-                setAddingCard(false)
-              }}
-              className="px-3 py-1 text-sm text-slate-400 hover:text-slate-200 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          onClick={() => setAddingCard(true)}
-          className="mt-1 p-2 text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded-lg transition-colors text-left"
-        >
-          + Add card
-        </button>
+      <button
+        onClick={() => setAddCardModalOpen(true)}
+        className="mt-1 p-2 text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded-lg transition-colors text-left"
+      >
+        + Add card
+      </button>
+
+      {addCardModalOpen && (
+        <CardModal mode="create" columnId={column.id} onClose={() => setAddCardModalOpen(false)} />
       )}
     </div>
   )
