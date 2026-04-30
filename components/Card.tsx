@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useBoardStore } from '@/store/boardStore'
 import type { Card } from '@/lib/data'
 
@@ -10,19 +12,25 @@ export function KanbanCard({ card }: { card: Card }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(card.title)
 
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: card.id,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
   function saveEdit() {
     const trimmed = draft.trim()
-    if (trimmed) {
-      editCard(card.id, trimmed)
-    } else {
-      setDraft(card.title)
-    }
+    if (trimmed) editCard(card.id, trimmed)
+    else setDraft(card.title)
     setEditing(false)
   }
 
   if (editing) {
     return (
-      <div className="bg-slate-700 rounded-lg p-3 shadow-sm">
+      <div ref={setNodeRef} style={style} className="bg-slate-700 rounded-lg p-3 shadow-sm">
         <textarea
           autoFocus
           value={draft}
@@ -46,9 +54,17 @@ export function KanbanCard({ card }: { card: Card }) {
   }
 
   return (
-    <div className="group relative bg-slate-700 rounded-lg p-3 shadow-sm hover:bg-slate-600 transition-colors">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`group relative bg-slate-700 rounded-lg p-3 shadow-sm transition-colors ${
+        isDragging ? 'opacity-30' : 'hover:bg-slate-600'
+      }`}
+      {...attributes}
+      {...listeners}
+    >
       <p
-        className="text-sm font-medium text-slate-100 cursor-pointer pr-6"
+        className="text-sm font-medium text-slate-100 pr-6"
         onClick={() => {
           setDraft(card.title)
           setEditing(true)
@@ -60,7 +76,10 @@ export function KanbanCard({ card }: { card: Card }) {
         <p className="mt-1 text-xs text-slate-400 leading-relaxed">{card.description}</p>
       )}
       <button
-        onClick={() => deleteCard(card.id)}
+        onClick={(e) => {
+          e.stopPropagation()
+          deleteCard(card.id)
+        }}
         className="absolute top-2 right-2 p-1 text-slate-500 hover:text-red-400 rounded opacity-0 group-hover:opacity-100 transition-opacity"
         title="Delete card"
       >

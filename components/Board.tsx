@@ -1,19 +1,40 @@
 'use client'
 
 import { useState } from 'react'
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  closestCorners,
+} from '@dnd-kit/core'
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useBoardStore } from '@/store/boardStore'
 import { KanbanColumn } from './Column'
 
 export function KanbanBoard() {
-  const { boards, activeBoardId, setActiveBoard, addBoard, renameBoard, deleteBoard, addColumn } =
+  const { boards, activeBoardId, setActiveBoard, addBoard, renameBoard, deleteBoard, addColumn, moveCard } =
     useBoardStore()
 
   const [renamingBoardId, setRenamingBoardId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
   const [addingColumn, setAddingColumn] = useState(false)
   const [newColumnTitle, setNewColumnTitle] = useState('')
+  const [activeCardId, setActiveCardId] = useState<string | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
 
   const activeBoard = boards.find((b) => b.id === activeBoardId)
+  const activeCard = activeBoard?.columns
+    .flatMap((c) => c.cards)
+    .find((card) => card.id === activeCardId)
 
   function handleAddBoard() {
     const newId = addBoard('New Board')
@@ -37,13 +58,50 @@ export function KanbanBoard() {
     }
   }
 
+  function handleDragStart(event: DragStartEvent) {
+    setActiveCardId(event.active.id as string)
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    setActiveCardId(null)
+
+    if (!over || !activeBoard || active.id === over.id) return
+
+    const activeId = active.id as string
+    const overId = over.id as string
+
+    const sourceColumn = activeBoard.columns.find((c) =>
+      c.cards.some((card) => card.id === activeId)
+    )
+    if (!sourceColumn) return
+
+    // Dropped directly onto a column (e.g. empty column)
+    const targetColumnDirect = activeBoard.columns.find((c) => c.id === overId)
+    if (targetColumnDirect) {
+      if (targetColumnDirect.id !== sourceColumn.id) {
+        moveCard(activeId, targetColumnDirect.id, targetColumnDirect.cards.length)
+      }
+      return
+    }
+
+    // Dropped onto a card
+    const targetColumn = activeBoard.columns.find((c) =>
+      c.cards.some((card) => card.id === overId)
+    )
+    if (!targetColumn) return
+
+    const overIndex = targetColumn.cards.findIndex((card) => card.id === overId)
+    moveCard(activeId, targetColumn.id, overIndex)
+  }
+
   if (boards.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center bg-slate-900 min-h-screen">
         <div className="text-center">
           <p className="text-slate-400 mb-4">No boards yet</p>
           <button
-            onClick={() => handleAddBoard()}
+            onClick={handleAddBoard}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors text-sm"
           >
             Create your first board
@@ -119,54 +177,74 @@ export function KanbanBoard() {
 
       {/* Columns */}
       {activeBoard && (
-        <main className="flex flex-1 gap-4 p-6 overflow-x-auto items-start">
-          {activeBoard.columns.map((column) => (
-            <KanbanColumn key={column.id} column={column} />
-          ))}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <main className="flex flex-1 gap-4 p-6 overflow-x-auto items-start">
+            {activeBoard.columns.map((column) => (
+              <KanbanColumn key={column.id} column={column} />
+            ))}
 
-          {addingColumn ? (
-            <div className="flex flex-col w-72 flex-shrink-0 bg-slate-800 rounded-xl p-3 gap-2">
-              <input
-                autoFocus
-                value={newColumnTitle}
-                onChange={(e) => setNewColumnTitle(e.target.value)}
-                placeholder="Column title"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddColumn()
-                  if (e.key === 'Escape') {
-                    setNewColumnTitle('')
-                    setAddingColumn(false)
-                  }
-                }}
-                className="px-2 py-1.5 text-sm bg-slate-700 text-slate-100 rounded border border-blue-500 outline-none placeholder:text-slate-500"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={handleAddColumn}
-                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-500 transition-colors"
-                >
-                  Add column
-                </button>
-                <button
-                  onClick={() => {
-                    setNewColumnTitle('')
-                    setAddingColumn(false)
+            {addingColumn ? (
+              <div className="flex flex-col w-72 flex-shrink-0 bg-slate-800 rounded-xl p-3 gap-2">
+                <input
+                  autoFocus
+                  value={newColumnTitle}
+                  onChange={(e) => setNewColumnTitle(e.target.value)}
+                  placeholder="Column title"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddColumn()
+                    if (e.key === 'Escape') {
+                      setNewColumnTitle('')
+                      setAddingColumn(false)
+                    }
                   }}
-                  className="px-3 py-1 text-sm text-slate-400 hover:text-slate-200 transition-colors"
-                >
-                  Cancel
-                </button>
+                  className="px-2 py-1.5 text-sm bg-slate-700 text-slate-100 rounded border border-blue-500 outline-none placeholder:text-slate-500"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleAddColumn}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-500 transition-colors"
+                  >
+                    Add column
+                  </button>
+                  <button
+                    onClick={() => {
+                      setNewColumnTitle('')
+                      setAddingColumn(false)
+                    }}
+                    className="px-3 py-1 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <button
-              onClick={() => setAddingColumn(true)}
-              className="flex-shrink-0 w-72 p-3 text-sm text-slate-400 hover:text-slate-200 bg-slate-800/50 hover:bg-slate-800 rounded-xl border-2 border-dashed border-slate-700 hover:border-slate-600 transition-colors"
-            >
-              + Add column
-            </button>
-          )}
-        </main>
+            ) : (
+              <button
+                onClick={() => setAddingColumn(true)}
+                className="flex-shrink-0 w-72 p-3 text-sm text-slate-400 hover:text-slate-200 bg-slate-800/50 hover:bg-slate-800 rounded-xl border-2 border-dashed border-slate-700 hover:border-slate-600 transition-colors"
+              >
+                + Add column
+              </button>
+            )}
+          </main>
+
+          <DragOverlay>
+            {activeCard && (
+              <div className="bg-slate-700 rounded-lg p-3 shadow-2xl rotate-1 opacity-95 w-72">
+                <p className="text-sm font-medium text-slate-100">{activeCard.title}</p>
+                {activeCard.description && (
+                  <p className="mt-1 text-xs text-slate-400 leading-relaxed">
+                    {activeCard.description}
+                  </p>
+                )}
+              </div>
+            )}
+          </DragOverlay>
+        </DndContext>
       )}
     </div>
   )

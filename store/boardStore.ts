@@ -14,6 +14,7 @@ type BoardStore = {
   addCard: (columnId: string, title: string) => void
   editCard: (cardId: string, title: string) => void
   deleteCard: (cardId: string) => void
+  moveCard: (cardId: string, toColumnId: string, toIndex: number) => void
 }
 
 export const useBoardStore = create<BoardStore>((set) => ({
@@ -118,4 +119,35 @@ export const useBoardStore = create<BoardStore>((set) => ({
         })),
       })),
     })),
+
+  moveCard: (cardId, toColumnId, toIndex) =>
+    set((state) => {
+      let movedCard: Card | undefined
+
+      const boardsWithoutCard = state.boards.map((b) => ({
+        ...b,
+        columns: b.columns.map((c) => {
+          const idx = c.cards.findIndex((card) => card.id === cardId)
+          if (idx === -1) return c
+          movedCard = c.cards[idx]
+          return { ...c, cards: c.cards.filter((card) => card.id !== cardId) }
+        }),
+      }))
+
+      if (!movedCard) return state
+
+      const updatedCard = { ...movedCard, columnId: toColumnId }
+
+      return {
+        boards: boardsWithoutCard.map((b) => ({
+          ...b,
+          columns: b.columns.map((c) => {
+            if (c.id !== toColumnId) return c
+            const cards = [...c.cards]
+            cards.splice(toIndex, 0, updatedCard)
+            return { ...c, cards }
+          }),
+        })),
+      }
+    }),
 }))

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useBoardStore } from '@/store/boardStore'
 import type { Column } from '@/lib/data'
 import { KanbanCard } from './Card'
@@ -12,6 +14,8 @@ export function KanbanColumn({ column }: { column: Column }) {
   const [titleDraft, setTitleDraft] = useState(column.title)
   const [addingCard, setAddingCard] = useState(false)
   const [newCardTitle, setNewCardTitle] = useState('')
+
+  const { setNodeRef, isOver } = useDroppable({ id: column.id })
 
   function saveTitle() {
     const trimmed = titleDraft.trim()
@@ -85,12 +89,22 @@ export function KanbanColumn({ column }: { column: Column }) {
         </div>
       </div>
 
-      {/* Cards */}
-      <div className="flex flex-col gap-2">
-        {column.cards.map((card) => (
-          <KanbanCard key={card.id} card={card} />
-        ))}
-      </div>
+      {/* Cards — droppable area */}
+      <SortableContext
+        items={column.cards.map((c) => c.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <div
+          ref={setNodeRef}
+          className={`flex flex-col gap-2 min-h-8 rounded-lg transition-colors ${
+            isOver && column.cards.length === 0 ? 'bg-slate-700/50' : ''
+          }`}
+        >
+          {column.cards.map((card) => (
+            <KanbanCard key={card.id} card={card} />
+          ))}
+        </div>
+      </SortableContext>
 
       {/* Add card */}
       {addingCard ? (
