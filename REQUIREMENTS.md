@@ -125,6 +125,7 @@ Card
 | M2        | Static board layout — hardcoded columns and cards      |
 | M3        | Dynamic state — add/edit/delete boards, columns, cards |
 | M4        | Drag-and-drop — cards reorder and move between columns |
+| M4.5      | Drag-and-drop — columns reorder within a board         |
 | M5        | LocalStorage persistence — data survives refresh       |
 | M6        | Richer cards — descriptions, due dates, labels         |
 | M7        | Backend + auth — Supabase integration                  |
