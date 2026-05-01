@@ -3,9 +3,8 @@
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
-  const supabase = createClient()
-
   async function signInWith(provider: 'github' | 'google') {
+    const supabase = createClient()
     await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo: `${window.location.origin}/auth/callback` },
