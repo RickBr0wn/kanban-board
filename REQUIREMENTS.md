@@ -49,10 +49,10 @@ A personal Kanban board web application for managing tasks and projects. Built i
 
 ### Phase 3 — Persistence & Data
 
-- [ ] Backend API (replace localStorage)
-- [ ] Database storage (PostgreSQL via Supabase or similar)
-- [ ] User authentication (sign in with GitHub / Google)
-- [ ] Data scoped to logged-in user
+- [x] Backend API (replace localStorage)
+- [x] Database storage (PostgreSQL via Supabase or similar)
+- [x] User authentication (sign in with GitHub / Google)
+- [x] Data scoped to logged-in user
 
 ### Phase 4 — Polish
 
@@ -129,7 +129,7 @@ Card
 | M5        | LocalStorage persistence — data survives refresh       |
 | M6        | Richer cards — descriptions, due dates, labels         |
 | M6.5      | Add card uses full modal (labels, priority, due date)  |
-| M7        | Backend + auth — Supabase integration                  |
+| M7        | ✅ Backend + auth — Supabase integration               |
 | M8        | Polish — search, keyboard shortcuts, light mode toggle |
 
 ---

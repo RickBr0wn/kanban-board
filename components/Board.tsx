@@ -38,11 +38,11 @@ const collisionDetection: CollisionDetection = (args) => {
 }
 
 export function KanbanBoard() {
-  const { boards, activeBoardId, setActiveBoard, addBoard, renameBoard, deleteBoard, addColumn, moveCard, moveColumn } =
+  const { boards, activeBoardId, isLoading, setActiveBoard, addBoard, renameBoard, deleteBoard, addColumn, moveCard, moveColumn, signOut } =
     useBoardStore()
 
   useEffect(() => {
-    useBoardStore.persist.rehydrate()
+    useBoardStore.getState().loadUserData()
   }, [])
 
   const [renamingBoardId, setRenamingBoardId] = useState<string | null>(null)
@@ -135,6 +135,14 @@ export function KanbanBoard() {
     moveCard(activeId, targetColumn.id, overIndex)
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 items-center justify-center bg-slate-900 min-h-screen">
+        <p className="text-slate-500 text-sm">Loading…</p>
+      </div>
+    )
+  }
+
   if (boards.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center bg-slate-900 min-h-screen">
@@ -213,6 +221,14 @@ export function KanbanBoard() {
         >
           + New Board
         </button>
+        <div className="ml-auto flex-shrink-0">
+          <button
+            onClick={signOut}
+            className="px-3 py-1.5 text-sm text-slate-500 hover:text-slate-300 transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
       </div>
 
       {/* Columns */}
