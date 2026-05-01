@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useBoardStore } from '@/store/boardStore'
 import type { Card, Priority, LabelColor } from '@/lib/data'
@@ -43,6 +43,14 @@ export function CardModal(props: CardModalProps) {
   const [preview, setPreview] = useState(false)
 
   const { onClose } = props
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [onClose])
 
   function save() {
     const details = {

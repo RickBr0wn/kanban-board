@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -24,6 +24,8 @@ import type { LabelColor, Priority } from '@/lib/data'
 import { KanbanColumn } from './Column'
 import { ThemeToggle } from './ThemeToggle'
 import { SearchBar } from './SearchBar'
+import { ShortcutsModal } from './ShortcutsModal'
+import { CardModal } from './CardModal'
 
 const collisionDetection: CollisionDetection = (args) => {
   if (args.active.data.current?.type === 'column') {
@@ -44,11 +46,53 @@ export function KanbanBoard() {
   const { boards, activeBoardId, isLoading, setActiveBoard, addBoard, renameBoard, deleteBoard, addColumn, moveCard, moveColumn, signOut } =
     useBoardStore()
 
+  const activeBoard = boards.find((b) => b.id === activeBoardId)
+
   useEffect(() => {
     useBoardStore.getState().loadUserData()
   }, [])
 
-  const activeBoard = boards.find((b) => b.id === activeBoardId)
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement
+      const typing = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
+
+      if (e.key === 'Escape') {
+        setShortcutsOpen(false)
+        setAddingColumn(false)
+        setNewColumnTitle('')
+        return
+      }
+      if (typing) return
+
+      switch (e.key) {
+        case '/':
+          e.preventDefault()
+          searchInputRef.current?.focus()
+          break
+        case '?':
+          setShortcutsOpen((o) => !o)
+          break
+        case 'b':
+        case 'B':
+          e.preventDefault()
+          handleAddBoard()
+          break
+        case 'c':
+        case 'C':
+          e.preventDefault()
+          if (activeBoard) setAddingColumn(true)
+          break
+        case 'n':
+        case 'N':
+          e.preventDefault()
+          if (activeBoard?.columns.length) setQuickAddColumnId(activeBoard.columns[0].id)
+          break
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [activeBoard])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterLabels, setFilterLabels] = useState<LabelColor[]>([])
@@ -76,6 +120,10 @@ export function KanbanBoard() {
       })),
     }
   }, [activeBoard, hasFilters, searchQuery, filterLabels, filterPriorities])
+
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const [quickAddColumnId, setQuickAddColumnId] = useState<string | null>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const [renamingBoardId, setRenamingBoardId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
@@ -253,6 +301,13 @@ export function KanbanBoard() {
           + New Board
         </button>
         <div className="ml-auto flex-shrink-0">
+          <button
+            onClick={() => setShortcutsOpen(true)}
+            className="p-1.5 rounded-md text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-xs font-bold"
+            title="Keyboard shortcuts (?)"
+          >
+            ?
+          </button>
           <ThemeToggle />
           <button
             onClick={signOut}
@@ -265,6 +320,7 @@ export function KanbanBoard() {
 
       {/* Search / filter */}
       <SearchBar
+        inputRef={searchInputRef}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         filterLabels={filterLabels}
@@ -361,6 +417,11 @@ export function KanbanBoard() {
             )}
           </DragOverlay>
         </DndContext>
+      )}
+
+      {shortcutsOpen && <ShortcutsModal onClose={() => setShortcutsOpen(false)} />}
+      {quickAddColumnId && (
+        <CardModal mode="create" columnId={quickAddColumnId} onClose={() => setQuickAddColumnId(null)} />
       )}
     </div>
   )

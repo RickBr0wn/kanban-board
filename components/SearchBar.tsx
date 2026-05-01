@@ -29,13 +29,14 @@ type Props = {
   onTogglePriority: (p: Priority) => void
   onClear: () => void
   hasFilters: boolean
+  inputRef?: React.RefObject<HTMLInputElement | null>
 }
 
 export function SearchBar({
   searchQuery, onSearchChange,
   filterLabels, onToggleLabel,
   filterPriorities, onTogglePriority,
-  onClear, hasFilters,
+  onClear, hasFilters, inputRef,
 }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900/50">
@@ -45,6 +46,7 @@ export function SearchBar({
           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input
+          ref={inputRef}
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
