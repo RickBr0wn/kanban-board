@@ -44,7 +44,7 @@ export function KanbanColumn({ column }: { column: Column }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex flex-col w-72 flex-shrink-0 bg-slate-800 rounded-xl p-3 gap-2 ${
+      className={`flex flex-col w-72 flex-shrink-0 bg-slate-50 dark:bg-slate-800 rounded-xl p-3 gap-2 ${
         isDragging ? 'opacity-40' : ''
       }`}
     >
@@ -55,7 +55,7 @@ export function KanbanColumn({ column }: { column: Column }) {
           <button
             {...attributes}
             {...listeners}
-            className="flex-shrink-0 p-1 text-slate-600 hover:text-slate-400 rounded cursor-grab active:cursor-grabbing touch-none"
+            className="flex-shrink-0 p-1 text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400 rounded cursor-grab active:cursor-grabbing touch-none"
             title="Drag to reorder column"
           >
             <svg
@@ -85,11 +85,11 @@ export function KanbanColumn({ column }: { column: Column }) {
                   setEditingTitle(false)
                 }
               }}
-              className="flex-1 px-1 py-0.5 text-sm font-semibold bg-slate-700 text-slate-100 rounded border border-blue-500 outline-none"
+              className="flex-1 px-1 py-0.5 text-sm font-semibold bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded border border-blue-500 outline-none"
             />
           ) : (
             <h2
-              className="text-sm font-semibold text-slate-200 cursor-pointer hover:text-white"
+              className="text-sm font-semibold text-slate-800 dark:text-slate-200 cursor-pointer hover:text-slate-900 dark:hover:text-white"
               onClick={() => {
                 setTitleDraft(column.title)
                 setEditingTitle(true)
@@ -100,7 +100,7 @@ export function KanbanColumn({ column }: { column: Column }) {
           )}
         </div>
         <div className="flex items-center gap-1 ml-2">
-          <span className="text-xs text-slate-400 bg-slate-700 rounded-full px-2 py-0.5">
+          <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-full px-2 py-0.5">
             {column.cards.length}
           </span>
           <button
@@ -137,7 +137,7 @@ export function KanbanColumn({ column }: { column: Column }) {
 
       <button
         onClick={() => setAddCardModalOpen(true)}
-        className="mt-1 p-2 text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded-lg transition-colors text-left"
+        className="mt-1 p-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-left"
       >
         + Add card
       </button>

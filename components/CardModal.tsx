@@ -76,11 +76,11 @@ export function CardModal(props: CardModalProps) {
       onPointerDown={onClose}
     >
       <div
-        className="bg-slate-800 rounded-xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]"
+        className="bg-slate-50 dark:bg-slate-800 rounded-xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]"
         onPointerDown={(e) => e.stopPropagation()}
       >
         {/* Title */}
-        <div className="flex items-start gap-3 p-5 border-b border-slate-700">
+        <div className="flex items-start gap-3 p-5 border-b border-slate-200 dark:border-slate-700">
           <textarea
             autoFocus
             value={title}
@@ -88,11 +88,11 @@ export function CardModal(props: CardModalProps) {
             placeholder="Card title"
             rows={1}
             onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }}
-            className="flex-1 text-base font-semibold bg-transparent text-slate-100 resize-none outline-none leading-snug placeholder:text-slate-500 placeholder:font-normal"
+            className="flex-1 text-base font-semibold bg-transparent text-slate-900 dark:text-slate-100 resize-none outline-none leading-snug placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-normal"
           />
           <button
             onClick={onClose}
-            className="flex-shrink-0 p-1 text-slate-400 hover:text-slate-200 rounded transition-colors"
+            className="flex-shrink-0 p-1 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -104,7 +104,7 @@ export function CardModal(props: CardModalProps) {
         <div className="overflow-y-auto p-5 space-y-5">
           {/* Labels */}
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Labels</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Labels</p>
             <div className="flex gap-2">
               {LABEL_OPTIONS.map(({ value, bg }) => (
                 <button
@@ -112,7 +112,7 @@ export function CardModal(props: CardModalProps) {
                   onClick={() => toggleLabel(value)}
                   className={`h-7 w-12 rounded ${bg} transition-all ${
                     labels.includes(value)
-                      ? 'opacity-100 ring-2 ring-white ring-offset-2 ring-offset-slate-800'
+                      ? 'opacity-100 ring-2 ring-white ring-offset-2 ring-offset-slate-50 dark:ring-offset-slate-800'
                       : 'opacity-40 hover:opacity-70'
                   }`}
                 />
@@ -122,7 +122,7 @@ export function CardModal(props: CardModalProps) {
 
           {/* Priority */}
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Priority</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Priority</p>
             <div className="flex flex-wrap gap-2">
               {PRIORITY_OPTIONS.map((p) => (
                 <button
@@ -130,7 +130,7 @@ export function CardModal(props: CardModalProps) {
                   onClick={() => togglePriority(p.value)}
                   className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${p.classes} ${
                     priority === p.value
-                      ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-800'
+                      ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-50 dark:ring-offset-slate-800'
                       : 'opacity-50 hover:opacity-80'
                   }`}
                 >
@@ -142,18 +142,18 @@ export function CardModal(props: CardModalProps) {
 
           {/* Due date */}
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Due date</p>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Due date</p>
             <div className="flex items-center gap-2">
               <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="px-3 py-1.5 text-sm bg-slate-700 text-slate-100 rounded-lg border border-slate-600 outline-none focus:border-blue-500 [color-scheme:dark]"
+                className="px-3 py-1.5 text-sm bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-500 [color-scheme:light] dark:[color-scheme:dark]"
               />
               {dueDate && (
                 <button
                   onClick={() => setDueDate('')}
-                  className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                  className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
                 >
                   Clear
                 </button>
@@ -164,16 +164,16 @@ export function CardModal(props: CardModalProps) {
           {/* Description */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Description</p>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description</p>
               <button
                 onClick={() => setPreview((p) => !p)}
-                className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
               >
                 {preview ? 'Edit' : 'Preview'}
               </button>
             </div>
             {preview ? (
-              <div className="min-h-24 p-3 bg-slate-700/50 rounded-lg">
+              <div className="min-h-24 p-3 bg-slate-100 dark:bg-slate-700/50 rounded-lg">
                 {description.trim() ? (
                   <div className="prose prose-sm prose-invert max-w-none">
                     <ReactMarkdown>{description}</ReactMarkdown>
@@ -188,17 +188,17 @@ export function CardModal(props: CardModalProps) {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add a description… (supports markdown)"
                 rows={4}
-                className="w-full px-3 py-2 text-sm bg-slate-700 text-slate-100 rounded-lg border border-slate-600 outline-none focus:border-blue-500 placeholder:text-slate-500 resize-none"
+                className="w-full px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg border border-slate-200 dark:border-slate-600 outline-none focus:border-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none"
               />
             )}
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 px-5 py-4 border-t border-slate-700">
+        <div className="flex justify-end gap-2 px-5 py-4 border-t border-slate-200 dark:border-slate-700">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+            className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
           >
             Cancel
           </button>

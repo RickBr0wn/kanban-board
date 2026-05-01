@@ -58,8 +58,8 @@ export function KanbanCard({ card }: { card: Card }) {
       <div
         ref={setNodeRef}
         style={style}
-        className={`group relative bg-slate-700 rounded-lg shadow-sm transition-colors ${
-          isDragging ? 'opacity-30' : 'hover:bg-slate-600 cursor-pointer'
+        className={`group relative bg-white dark:bg-slate-700 rounded-lg shadow-sm transition-colors ${
+          isDragging ? 'opacity-30' : 'hover:bg-slate-50 dark:hover:bg-slate-600 cursor-pointer'
         }`}
         {...attributes}
         {...listeners}
@@ -75,10 +75,10 @@ export function KanbanCard({ card }: { card: Card }) {
         )}
 
         <div className="px-3 py-2.5">
-          <p className="text-sm font-medium text-slate-100 pr-6 leading-snug">{card.title}</p>
+          <p className="text-sm font-medium text-slate-900 dark:text-slate-100 pr-6 leading-snug">{card.title}</p>
 
           {descSnippet && (
-            <p className="mt-1 text-xs text-slate-400 leading-relaxed line-clamp-1">{descSnippet}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-1">{descSnippet}</p>
           )}
 
           {(card.priority || dueDateStyle) && (
